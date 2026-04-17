@@ -35,6 +35,11 @@ jobs:
           --function-name simple-lambda-projects \
           --zip-file fileb://target/lambda-app.jar
 
+   - name: Wait for Lambda to be Active
+      run: |
+        aws lambda wait function-updated \
+          --function-name simple-lambda-projects
+
     - name: Update Lambda Configuration (Handler)
       run: |
         aws lambda update-function-configuration \

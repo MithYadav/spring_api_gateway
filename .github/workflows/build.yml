@@ -37,3 +37,8 @@ jobs:
         aws lambda update-function-code \
           --function-name simple-lambda-projects \
           --zip-file fileb://target/lambda-app.jar
+   - name: Update Lambda Configuration (Handler)
+     run: |
+        aws lambda update-function-configuration \
+          --function-name simple-lambda-projects \
+          --handler com.example.test.StreamLambdaHandler::handleRequest

@@ -2,7 +2,7 @@ name: Java CI/CD with Spring Boot and AWS Lambda
 
 on:
   push:
-    branches: [ "main" ] # Runs whenever you push to main
+    branches: [ "main" ]
 
 jobs:
   build-and-deploy:
@@ -20,7 +20,6 @@ jobs:
         cache: maven
 
     - name: Build with Maven
-      # This creates the JAR file in the target/ directory
       run: mvn clean package -DskipTests
 
     - name: Configure AWS Credentials
@@ -28,17 +27,16 @@ jobs:
       with:
         aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
         aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-        aws-region: us-east-1 # Change to your region if different
+        aws-region: us-east-1
 
     - name: Deploy to Lambda
       run: |
-        # Use the name of your Lambda function (e.g., simple-lambda-projects)
-        # We use fileb:// to ensure the JAR is uploaded as a binary
         aws lambda update-function-code \
           --function-name simple-lambda-projects \
           --zip-file fileb://target/lambda-app.jar
-   - name: Update Lambda Configuration (Handler)
-     run: |
+
+    - name: Update Lambda Configuration (Handler)
+      run: |
         aws lambda update-function-configuration \
           --function-name simple-lambda-projects \
           --handler com.example.test.StreamLambdaHandler::handleRequest

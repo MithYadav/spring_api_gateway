@@ -40,8 +40,43 @@ jobs:
         aws lambda wait function-updated --function-name simple-lambda-projects
         sleep 5
 
-    - name: Update Lambda Configuration (Handler)
+    - name: Update Lambda Configuration
       run: |
         aws lambda update-function-configuration \
           --function-name simple-lambda-projects \
           --handler com.example.test.StreamLambdaHandler::handleRequest
+
+    - name: Wait for Lambda Configuration to be Active
+      run: |
+        aws lambda wait function-updated --function-name simple-lambda-projects
+        sleep 5
+
+    - name: Add Lambda Permission for API Gateway
+      run: |
+        # Remove existing permission if it exists (to avoid conflict on re-runs)
+        aws lambda remove-permission \
+          --function-name simple-lambda-projects \
+          --statement-id apigateway-invoke \
+          --region us-east-1 || true
+
+        # Add fresh permission
+        aws lambda add-permission \
+          --function-name simple-lambda-projects \
+          --statement-id apigateway-invoke \
+          --action lambda:InvokeFunction \
+          --principal apigateway.amazonaws.com \
+          --source-arn arn:aws:execute-api:us-east-1:${{ secrets.AWS_ACCOUNT_ID }}:${{ secrets.API_GATEWAY_ID }}/*/*/* \
+          --region us-east-1
+
+    - name: Deploy API Gateway
+      run: |
+        aws apigateway create-deployment \
+          --rest-api-id ${{ secrets.API_GATEWAY_ID }} \
+          --stage-name prod \
+          --description "Deployed from GitHub Actions - ${{ github.sha }}"
+
+    - name: Print API Gateway URL
+      run: |
+        echo "API Gateway URL: https://${{ secrets.API_GATEWAY_ID }}.execute-api.us-east-1.amazonaws.com/prod"
+        echo "Test GET  : https://${{ secrets.API_GATEWAY_ID }}.execute-api.us-east-1.amazonaws.com/prod/products/hello"
+        echo "Test POST : https://${{ secrets.API_GATEWAY_ID }}.execute-api.us-east-1.amazonaws.com/prod/products/echo"

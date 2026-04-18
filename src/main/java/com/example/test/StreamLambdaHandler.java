@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import com.amazonaws.serverless.exceptions.ContainerInitializationException;
-import com.amazonaws.serverless.proxy.model.HttpApiV2ProxyRequest;
+import com.amazonaws.serverless.proxy.model.AwsProxyRequest;
 import com.amazonaws.serverless.proxy.model.AwsProxyResponse;
 import com.amazonaws.serverless.proxy.spring.SpringBootLambdaContainerHandler;
 import com.amazonaws.services.lambda.runtime.Context;
@@ -13,11 +13,11 @@ import com.amazonaws.services.lambda.runtime.RequestStreamHandler;
 
 public class StreamLambdaHandler implements RequestStreamHandler {
 
-    private static SpringBootLambdaContainerHandler<HttpApiV2ProxyRequest, AwsProxyResponse> handler;
+    private static SpringBootLambdaContainerHandler<AwsProxyRequest, AwsProxyResponse> handler;
 
     static {
         try {
-            handler = SpringBootLambdaContainerHandler.getHttpApiV2ProxyHandler(
+            handler = SpringBootLambdaContainerHandler.getAwsProxyHandler(
                 SpringBootApiGatewayApplication.class
             );
         } catch (ContainerInitializationException e) {
